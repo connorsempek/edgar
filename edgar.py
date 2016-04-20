@@ -1,3 +1,4 @@
+# edgary.py
 
 #------------------------------------------------------------------------------
 # imports
@@ -8,10 +9,10 @@ import pandas as pd
 
 
 #------------------------------------------------------------------------------
-# parent class with base url info
+# EDGAR class, defines search paths and methods in SEC's EDGAR web search
 
 class EDGAR(object):
-
+	'''class containing basic search parameters'''
 	def __init__(self, action):
 
 		self.search_url = 'http://www.sec.gov/cgi-bin/browse-edgar'
@@ -68,10 +69,11 @@ class Company(EDGAR):
 
 
 	def _search_results_text(self):
+		'''grabs raw html of search results pages'''
 
-		MAX = 10 ** 6
-		CHECK_STR = 'Acc-no'
-		PAGE_LIMIT = 100 # current site returned results max
+		MAX = 10 ** 6 # does any company has over 10^8 (100 per page) filings?
+		CHECK_STR = 'Acc-no' # exists when results table is not empty
+		PAGE_LIMIT = 100 # returned results max, web search constraint
 		
 		params = self.params
 		params.update({'count': PAGE_LIMIT})
@@ -86,12 +88,14 @@ class Company(EDGAR):
 
 
 	def _get_cik(self):
+		'''returns CIK, used if Company is instantiated with ticker'''
 
 		res = self.search_results[0]
 		return res.split('</head>')[0].split('CIK=')[-1].split('&')[0]
 
 
 	def _filing_history(self):
+		'''returns filings' meta data from html results in pandas DataFrame'''
 
 		tbls = [pd.read_html(res, header=0)[-1] for res in self.search_results]
 		filings = pd.concat(tbls)
@@ -117,6 +121,7 @@ class Company(EDGAR):
 
 
 	def _add_filing_urls(self):
+		'''adds columns containing url to raw html of each filing'''
 
 		self.filings['URL'] = (''
 			+ self.archive_url
@@ -127,13 +132,36 @@ class Company(EDGAR):
 			+ self.filings.AccessionNo
 			+ '.txt'
 			)
-		
-
-	def get_filing(self, form, ):
-		pass
 
 
+#------------------------------------------------------------------------------
+# Filings subclass, retrieves and parses a company's filings
 
+class Filings(Company):
+
+
+	def __init__(self, cik, form, date_filed=None):
+		'''tools for pulling and parsing filings of a company
+
+		Parameters
+		----------
+			cik        : (str) can be CIK or ticker symbol of a public company
+			form       : (str) any valid SEC form filed
+			date_filed : (str) datetime string of form '%Y-%m-%d'
+		'''
+
+		Company.__init__(self, cik=cik, form=form)
+
+	
+	def get_filing(self):
+		pass 
+
+
+
+
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # testing
 
