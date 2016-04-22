@@ -1,6 +1,6 @@
 # edgar
 
-![Alt text](eap.png)
+![Alt text](eap.png =250x)
 
 ## Synopsis
 
