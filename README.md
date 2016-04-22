@@ -1,4 +1,6 @@
-# edgar.py
+# edgar
+
+![Alt text](eap.png)
 
 ## Synopsis
 
